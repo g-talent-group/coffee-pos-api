@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
@@ -20,7 +21,8 @@ import java.sql.Timestamp;
 @Table(name = "orders")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Order {
+@EqualsAndHashCode(callSuper = false)
+public class Order extends Model {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -30,12 +32,6 @@ public class Order {
 
     @Column(name = "total_amount")
     private int totalAmount;
-
-    @Column(name = "create_at")
-    private Timestamp createAt;
-
-    @Column(name = "update_at")
-    private Timestamp updateAt;
 }
 
 
