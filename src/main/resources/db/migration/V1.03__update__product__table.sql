@@ -1,0 +1,1 @@
+Alter table product add column status ENUM('sale', 'not-sale', 'out-of-stock') not null default 'sale';
