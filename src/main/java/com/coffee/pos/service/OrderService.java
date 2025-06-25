@@ -32,4 +32,8 @@ public class OrderService {
     public Order getOrderById(int id) {
         return orderRepository.findById(id).orElse(null);
     }
+
+    public List<Order> getOrderByTotalAmountGreaterThan(int totalAmount) {
+        return orderRepository.findByTotalAmountGreaterThan(totalAmount);
+    }
 }

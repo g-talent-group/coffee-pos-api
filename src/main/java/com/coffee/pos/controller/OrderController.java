@@ -36,4 +36,9 @@ public class OrderController {
     public Order getOrderById(@PathVariable int id) {
         return orderService.getOrderById(id);
     }
+
+    @GetMapping("/amount/{amount}")
+    public List<Order> getOrderByTotalAmountGreaterThan(@PathVariable int amount) {
+        return orderService.getOrderByTotalAmountGreaterThan(amount);
+    }
 }
