@@ -3,6 +3,8 @@ package com.coffee.pos.service;
 import com.coffee.pos.model.Model;
 import com.coffee.pos.model.Order;
 import com.coffee.pos.repository.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.util.List;
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired
     public OrderService(OrderRepository orderRepository) {
@@ -22,6 +25,7 @@ public class OrderService {
     // Create, update, delete, get by ID, get all
     public Order createOrder(Order order) {
         Order.initTime(order);
+        logger.info("createOrder: {}", order);
         return orderRepository.save(order);
     }
 

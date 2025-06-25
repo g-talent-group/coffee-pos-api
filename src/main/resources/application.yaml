@@ -12,3 +12,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
     baselineOnMigrate: true
+
+logging:
+  level:
+    root: INFO
+    com.example.myapp: DEBUG
+  file:
+    name: logs/application.log
