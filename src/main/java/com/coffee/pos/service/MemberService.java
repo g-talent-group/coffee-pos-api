@@ -35,6 +35,8 @@ public class MemberService {
         memberRepository
             .findById(id)
             .orElseThrow(() -> new RuntimeException("Member not found with id: " + 1d));
-    return MemberResponseDTO.toDTO(member, includeOrder);
+    MemberResponseDTO memberResponseDTO = MemberResponseDTO.toDTO(member, includeOrder);
+    log.info("Found member: {}", memberResponseDTO);
+    return memberResponseDTO;
   }
 }

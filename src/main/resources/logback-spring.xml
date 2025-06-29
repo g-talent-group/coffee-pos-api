@@ -2,15 +2,32 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+    <property name="LOG_PATH" value="logs"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE}</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+    <appender name="MEMBER_SERVICE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/member-service/member-service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 每天輪換日誌文件，舊的日誌文件會被加上日期 -->
-            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
-
-            <!-- 保留30天的日誌文件 -->
+            <fileNamePattern>${LOG_PATH}/member-service/member-service.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 保留60天的日誌文件 -->
             <maxHistory>60</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="ORDER_SERVICE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/order-service/order-service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 每天輪換日誌文件，舊的日誌文件會被加上日期 -->
+            <fileNamePattern>${LOG_PATH}/order-service/order-service.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 保留60天的日誌文件 -->
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
         </rollingPolicy>
 
         <encoder>
@@ -26,7 +43,17 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
     </root>
+
+    <!-- 為特定包配置日誌 -->
+    <logger name="com.coffee.pos.service.MemberService" level="DEBUG" additivity="false">
+        <appender-ref ref="MEMBER_SERVICE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="com.coffee.pos.service.OrderService" level="INFO" additivity="false">
+        <appender-ref ref="ORDER_SERVICE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
 </configuration>
