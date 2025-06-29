@@ -1,24 +1,15 @@
 package com.coffee.pos.service;
 
 import com.coffee.pos.dto.OrderResponseDTO;
-import com.coffee.pos.model.Employee;
 import com.coffee.pos.model.Member;
-import com.coffee.pos.model.Model;
 import com.coffee.pos.model.Order;
 import com.coffee.pos.repository.MemberRepository;
 import com.coffee.pos.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
