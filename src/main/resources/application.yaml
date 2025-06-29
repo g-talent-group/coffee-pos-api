@@ -4,7 +4,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
   datasource:
     url: jdbc:mysql://localhost:3306/coffee_pos?useUnicode=true&characterEncoding=UTF-8
     username: root
@@ -16,6 +16,6 @@ spring:
 logging:
   level:
     root: INFO
-    com.example.myapp: DEBUG
+    com.coffee.pos: DEBUG
   file:
     name: logs/application.log

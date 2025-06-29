@@ -1,0 +1,1 @@
+ALTER TABLE orders ADD COLUMN members_id bigint DEFAULT NULL, ADD FOREIGN KEY (members_id) REFERENCES members(id);
