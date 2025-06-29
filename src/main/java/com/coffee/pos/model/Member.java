@@ -7,12 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Data
@@ -20,18 +19,17 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Table(name = "members")
-public class Member extends Model{
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+public class Member extends Model {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  Long id;
 
-    @Column(name = "name", nullable = false)
-    String name;
+  @Column(name = "name", nullable = false)
+  String name;
 
-    @Column(name = "phone", nullable = false)
-    String phone;
+  @Column(name = "phone", nullable = false)
+  String phone;
 
-    @OneToMany(mappedBy = "member")
-    List<Order> orders;
-
+  @OneToMany(mappedBy = "member")
+  List<Order> orders;
 }
