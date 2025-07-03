@@ -1,6 +1,7 @@
 # 定義變數
 MVN = ./mvnw
 JAVA = java
+ENV = .env
 POM_VERSION=$(shell $(MVN) help:evaluate -Dexpression=project.version -q -DforceStdout)
 JAR_FILE = target/pos-$(POM_VERSION).jar
 
@@ -24,7 +25,6 @@ format:
 .PHONY: build
 build:
 	$(MVN) package
-
 # 運行專案
 .PHONY: run
 run:
