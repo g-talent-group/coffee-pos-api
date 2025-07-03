@@ -1,5 +1,6 @@
 package com.coffee.pos.config;
 
+import com.coffee.pos.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,10 @@ public class SecurityConfig {
                 authz
                     .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
                     .permitAll()
+                    .requestMatchers("/api/admin/member/**")
+                    .hasAnyRole(User.UserRole.ADMIN.name())
+                    .requestMatchers("/api/user/member/**")
+                    .hasAnyRole(User.UserRole.USER.name())
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

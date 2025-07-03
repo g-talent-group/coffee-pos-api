@@ -1,4 +1,4 @@
-package com.coffee.pos.controller;
+package com.coffee.pos.controller.user;
 
 import com.coffee.pos.dto.MemberResponseDTO;
 import com.coffee.pos.model.Member;
@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/member")
-public class MemberController {
+@RequestMapping("api/user/member")
+public class UserMemberController {
   private final MemberService memberService;
 
   @Autowired
-  public MemberController(MemberService memberService) {
+  public UserMemberController(MemberService memberService) {
     this.memberService = memberService;
   }
 
@@ -30,7 +30,8 @@ public class MemberController {
 
   @GetMapping
   public List<MemberResponseDTO> findMember(
-      @RequestParam String name, @RequestParam(defaultValue = "false") boolean includeOrder) {
+      @RequestParam(defaultValue = "") String name,
+      @RequestParam(defaultValue = "false") boolean includeOrder) {
     return memberService.findMemberByName(name, includeOrder);
   }
 

@@ -25,9 +25,15 @@ public class MemberService {
   }
 
   public List<MemberResponseDTO> findMemberByName(String name, boolean includeOrder) {
-    return memberRepository.findByNameContainingIgnoreCase(name).stream()
-        .map(member -> MemberResponseDTO.toDTO(member, includeOrder))
-        .toList();
+    if (name.isEmpty()) {
+      return memberRepository.findAll().stream()
+          .map(member -> MemberResponseDTO.toDTO(member, includeOrder))
+          .toList();
+    } else {
+      return memberRepository.findByNameContainingIgnoreCase(name).stream()
+          .map(member -> MemberResponseDTO.toDTO(member, includeOrder))
+          .toList();
+    }
   }
 
   public MemberResponseDTO findMemberById(Long id, boolean includeOrder) {
