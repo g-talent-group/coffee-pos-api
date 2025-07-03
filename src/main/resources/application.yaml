@@ -19,3 +19,6 @@ logging:
     com.coffee.pos: DEBUG
   file:
     name: logs/application.log
+jwt:
+  secret: 48e48065b44c4d117dc08c49567bf4d9
+  expiration: 86400
