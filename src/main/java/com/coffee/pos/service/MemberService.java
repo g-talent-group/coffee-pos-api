@@ -6,6 +6,7 @@ import com.coffee.pos.repository.MemberRepository;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +25,7 @@ public class MemberService {
     return memberRepository.save(member);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   public List<MemberResponseDTO> findMemberByName(String name, boolean includeOrder) {
     if (name.isEmpty()) {
       return memberRepository.findAll().stream()
