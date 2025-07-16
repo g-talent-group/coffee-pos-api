@@ -2,8 +2,10 @@ package com.coffee.pos.controller;
 
 import com.coffee.pos.dto.CommonObjectResponse;
 import com.coffee.pos.dto.LoginRequestDTO;
+import com.coffee.pos.dto.RefreshTokenRequestDTO;
 import com.coffee.pos.dto.RegisterRequestDTO;
 import com.coffee.pos.dto.TokenResponseDTO;
+import com.coffee.pos.exception.TokenRefreshException;
 import com.coffee.pos.model.RefreshToken;
 import com.coffee.pos.service.RefreshTokenService;
 import com.coffee.pos.service.UserService;
@@ -126,41 +128,66 @@ public class AuthController {
         }
     }
 
+//    @PostMapping("/refresh")
+//    @Operation(summary = "刷新 Token", description = "使用有效的 Token 獲取新的 Token")
+//    public ResponseEntity<CommonObjectResponse<String>> refreshToken(
+//            HttpServletRequest request) {
+//
+//        String authorizationHeader = request.getHeader("Authorization");
+//
+//        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                    .body(CommonObjectResponse.error("缺少有效的 Authorization Header"));
+//        }
+//
+//        try {
+//            String jwt = authorizationHeader.substring(7);
+//            String username = jwtUtil.extractUsername(jwt);
+//
+//            if (username != null) {
+//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//
+//                if (jwtUtil.validateToken(jwt, userDetails)) {
+//                    String newToken = jwtUtil.generateToken(userDetails);
+//                    log.info("Token refreshed for user: {}", username);
+//                    return ResponseEntity.ok(CommonObjectResponse.success(newToken, "Token 刷新成功"));
+//                }
+//            }
+//
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                    .body(CommonObjectResponse.error("無效的 Token"));
+//
+//        } catch (Exception e) {
+//            log.error("Token refresh failed: {}", e.getMessage());
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(CommonObjectResponse.error("Token 刷新失敗"));
+//        }
+//    }
+
     @PostMapping("/refresh")
-    @Operation(summary = "刷新 Token", description = "使用有效的 Token 獲取新的 Token")
-    public ResponseEntity<CommonObjectResponse<String>> refreshToken(
-            HttpServletRequest request) {
+    public ResponseEntity<CommonObjectResponse<TokenResponseDTO>> refreshToken(
+            @RequestBody RefreshTokenRequestDTO request) {
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String requestRefreshToken = request.getRefreshToken();
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(CommonObjectResponse.error("缺少有效的 Authorization Header"));
-        }
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+                    String newAccessToken = jwtUtil.generateAccessToken(userDetails);
+                    TokenResponseDTO response = TokenResponseDTO.builder()
+                            .accessToken(newAccessToken)
+                            .refreshToken(requestRefreshToken)
+                            .tokenType("Bearer")
+                            .expiresIn(900L)
+                            .build();
 
-        try {
-            String jwt = authorizationHeader.substring(7);
-            String username = jwtUtil.extractUsername(jwt);
-
-            if (username != null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (jwtUtil.validateToken(jwt, userDetails)) {
-                    String newToken = jwtUtil.generateToken(userDetails);
-                    log.info("Token refreshed for user: {}", username);
-                    return ResponseEntity.ok(CommonObjectResponse.success(newToken, "Token 刷新成功"));
-                }
-            }
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(CommonObjectResponse.error("無效的 Token"));
-
-        } catch (Exception e) {
-            log.error("Token refresh failed: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(CommonObjectResponse.error("Token 刷新失敗"));
-        }
+                    return ResponseEntity.ok(CommonObjectResponse.success(response, "Token 刷新成功"));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken, "Refresh token is not in database!"));
     }
+
 
     @PostMapping("/logout")
     @Operation(summary = "使用者登出", description = "登出並清除認證資訊")
