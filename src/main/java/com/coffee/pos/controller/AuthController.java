@@ -2,8 +2,10 @@ package com.coffee.pos.controller;
 
 import com.coffee.pos.dto.CommonObjectResponse;
 import com.coffee.pos.dto.LoginRequestDTO;
-import com.coffee.pos.dto.LoginResponseDTO;
 import com.coffee.pos.dto.RegisterRequestDTO;
+import com.coffee.pos.dto.TokenResponseDTO;
+import com.coffee.pos.model.RefreshToken;
+import com.coffee.pos.service.RefreshTokenService;
 import com.coffee.pos.service.UserService;
 import com.coffee.pos.utils.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +22,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -43,46 +44,38 @@ public class AuthController {
     private final UserService userService;
     @Autowired
     private final UserDetailsService userDetailsService;
+    @Autowired
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/login")
     @Operation(summary = "使用者登入", description = "使用者登入並取得 JWT token")
-    public ResponseEntity<CommonObjectResponse<LoginResponseDTO>> login(
+    public ResponseEntity<CommonObjectResponse<TokenResponseDTO>> login(
             @Valid @RequestBody LoginRequestDTO request) {
 
         log.info("Login attempt for user: {}", request.getUsername());
 
         try {
-            // 執行認證
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            // 獲取認證後的使用者詳情
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-            // 生成 JWT Token
-            String jwt = jwtUtil.generateToken(userDetails);
+            // 生成 access token
+            String accessToken = jwtUtil.generateAccessToken(userDetails);
 
-            // 獲取使用者角色資訊
-            String role = userDetails.getAuthorities().stream()
-                    .findFirst()
-                    .map(GrantedAuthority::getAuthority)
-                    .orElse("ROLE_USER")
-                    .replace("ROLE_", "");
+            // 生成 refresh token
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-            // 構建回應
-            LoginResponseDTO response = LoginResponseDTO.builder()
-                    .token(jwt)
-                    .username(userDetails.getUsername())
-                    .role(role)
-                    .expiresIn(86400L) // 24 hours
+            TokenResponseDTO response = TokenResponseDTO.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken.getToken())
+                    .tokenType("Bearer")
+                    .expiresIn(900L) // 15 分鐘
                     .build();
 
-            log.info("User {} logged in successfully with role: {}", request.getUsername(), role);
             return ResponseEntity.ok(CommonObjectResponse.success(response, "登入成功"));
+
 
         } catch (BadCredentialsException e) {
             log.warn("Login failed for user {}: Invalid credentials", request.getUsername());

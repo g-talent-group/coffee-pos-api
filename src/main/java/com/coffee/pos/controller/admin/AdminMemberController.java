@@ -5,6 +5,7 @@ import com.coffee.pos.model.Member;
 import com.coffee.pos.service.MemberService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ public class AdminMemberController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ADMIN')")
   public MemberResponseDTO findMemberById(
       @PathVariable Long id, @RequestParam(defaultValue = "false") boolean includeOrder) {
     return memberService.findMemberById(id, includeOrder);

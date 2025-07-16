@@ -27,8 +27,11 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
-    private Long expiration;
+    @Value("${jwt.expiration:900}") // 15 分鐘
+    private Long jwtExpiration;
+
+    @Value("${jwt.refresh-expiration:604800}") // 7 天
+    private Long refreshTokenDuration;
 
     // 生成包含角色資訊的 Token
     public String generateToken(UserDetails userDetails) {
@@ -43,6 +46,36 @@ public class JwtUtil {
         return createToken(claims, userDetails.getUsername());
     }
 
+    // 生成 Access Token (短期)
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateTokenWithExpiration(userDetails, jwtExpiration);
+    }
+
+    // 生成 Refresh Token (長期) - 實際上 refresh token 由 RefreshTokenService 管理
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateTokenWithExpiration(userDetails, refreshTokenDuration);
+    }
+
+    private String generateTokenWithExpiration(UserDetails userDetails, Long expiration) {
+        Map<String, Object> claims = new HashMap<>();
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        claims.put("roles", authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expiration * 1000);
+        SecretKey key = getSigningKey();
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
+
     // 生成帶有自定義聲明的 Token
     public String generateTokenWithClaims(String username, Map<String, Object> extraClaims) {
         Map<String, Object> claims = new HashMap<>(extraClaims);
@@ -51,7 +84,7 @@ public class JwtUtil {
 
     private String createToken(Map<String, Object> claims, String username) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expiration * 1000);
+        Date expiryDate = new Date(now.getTime() + jwtExpiration * 1000);
         SecretKey key = getSigningKey();
 
         return Jwts.builder()
