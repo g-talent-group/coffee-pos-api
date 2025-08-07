@@ -36,12 +36,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         (authz) ->
                                 authz
-                                        .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
+                                        .requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger/**", "/actuator/**")
                                         .permitAll()
                                         .requestMatchers("/api/admin/**")
                                         .hasAnyRole(User.UserRole.ADMIN.name(), User.UserRole.MANAGER.name())
                                         .requestMatchers("/api/user/**")
-                                        .hasAnyRole(User.UserRole.USER.name(), User.UserRole.ADMIN.name())
+                                        .hasAnyRole(User.UserRole.USER.name(), User.UserRole.ADMIN.name(), User.UserRole.MANAGER.name())
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

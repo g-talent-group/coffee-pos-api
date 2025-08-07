@@ -7,7 +7,9 @@ spring:
       ddl-auto: update
   datasource:
     url: jdbc:mysql://localhost:3306/coffee_pos?useUnicode=true
+#    url: jdbc:mysql://167.179.93.64:3306/Morris?useUnicode=true
     username: root
+#    password: morris-mysql-pw
     password: my-secret-pw
     driver-class-name: com.mysql.cj.jdbc.Driver
   flyway:
@@ -22,3 +24,16 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_SECRET:86400}
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: "*"
+    endpoint:
+      health:
+        show-details: always
+    metrics:
+      export:
+        prometheus:
+          enabled: true

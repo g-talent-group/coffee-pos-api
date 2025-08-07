@@ -1,5 +1,6 @@
 package com.coffee.pos.service;
 
+import com.coffee.pos.aspect.LogExecutionTime;
 import com.coffee.pos.dto.RegisterRequestDTO;
 import com.coffee.pos.dto.UpdateUserProfileDTO;
 import com.coffee.pos.model.User;
@@ -7,14 +8,16 @@ import com.coffee.pos.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
 
   private final UserRepository userRepository;
@@ -42,16 +45,21 @@ public class UserService {
     return userRepository.save(user);
   }
 
+  // 快取使用者資訊
+  @Cacheable(value = "users", key = "#username")
   public User findByUsername(String username) {
     return userRepository
         .findByUsername(username)
         .orElseThrow(() -> new RuntimeException("使用者不存在"));
   }
 
+  // 快取使用者資訊
+  @Cacheable(value = "users", key = "#userId")
   public User findById(Long userId) {
     return userRepository.findById(userId).orElseThrow();
   }
 
+  @LogExecutionTime(value = "獲取使用者資訊", includeArgs = true)
   public List<User> findAll() {
     return userRepository.findAll();
   }
